@@ -1,17 +1,28 @@
-// backend/config/db.js
+// config/db.js
 const { Sequelize } = require("sequelize");
-require("dotenv").config();
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
-  {
-    host: process.env.DB_HOST || "127.0.0.1",
-    port: process.env.DB_PORT || 5432,
-    dialect: "postgres",
-    logging: false, // istersen true yapıp SQL loglarını görebilirsin
-  }
-);
+// Burada .env'e gerek yok, Render env'den alıyoruz
+// require("dotenv").config();
+
+// Canlıda sadece DATABASE_URL kullanacağız
+if (!process.env.DATABASE_URL) {
+  console.error("FATAL: DATABASE_URL is NOT set in environment!");
+  console.error("Current env keys:", Object.keys(process.env));
+  process.exit(1);
+}
+
+console.log("🔌 Using DATABASE_URL for Postgres:", process.env.DATABASE_URL);
+
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: "postgres",
+  protocol: "postgres",
+  logging: false,
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false,
+    },
+  },
+});
 
 module.exports = sequelize;
