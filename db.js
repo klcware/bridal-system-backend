@@ -1,11 +1,12 @@
 const { Sequelize } = require('sequelize');
 
-const isProduction = process.env.NODE_ENV === 'production';
+// DATABASE_URL varsa onu kullan, yoksa local env'lere dön
+const hasDatabaseUrl = !!process.env.DATABASE_URL;
 
 let sequelize;
 
-if (isProduction) {
-  // Render production DB
+if (hasDatabaseUrl) {
+  // Render / production DB
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
     protocol: 'postgres',
@@ -13,9 +14,9 @@ if (isProduction) {
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false
-      }
-    }
+        rejectUnauthorized: false,
+      },
+    },
   });
 } else {
   // Local development DB
